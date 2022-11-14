@@ -57,21 +57,6 @@ public class Grid{
 
     //-------------------------------------------------------------------------------------------//
 
-
-    class Child implements Runnable {
-
-
-        @Override
-        public void run() {
-            // TODO Auto-generated method stub
-            
-        }
-
-        
-    }
-
-
-
     /**
      * The main function is a Java program that takes a 2D array of numbers and averages the numbers
      * in the array until the error is less than 5
@@ -100,6 +85,19 @@ public class Grid{
 
         // calculate thread range
         int range = cRows/numChild;
+
+        List<Thread> threads = new ArrayList<Thread>();
+
+        // store grid starting point
+        int begin = 0;
+
+        // Spawn children processes
+        for (int i=0; i<numChild; i++) {
+            Thread t = new Thread(new Child(begin, begin+range));
+            t.start();
+            threads.add(t);
+            begin += range + 1;
+        }
 
         Float[][] grid = new Float[cRows][cCols];
 
@@ -169,6 +167,18 @@ public class Grid{
         System.out.println();
         System.out.println();
 
+    }
+
+    class Child implements Runnable {
+
+
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+            
+        }
+
+        
     }
 
     //-------------------------------------------------------------------------------------------//
