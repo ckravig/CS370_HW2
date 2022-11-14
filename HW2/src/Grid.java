@@ -12,7 +12,7 @@
  *      * Test Double vs Float runtime
  */
 
-public class Grid {
+public class Grid{
 
     //-------------------------------------------------------------------------------------------// 
 
@@ -26,10 +26,6 @@ public class Grid {
     // store total error
     public static Float tError = 0.00f;
 
-    // thread type
-    public static int threads = 1;
-    public static String threading = "";
-
     // average grid value
     public static Float tAvg = 0.00f;
 
@@ -37,7 +33,7 @@ public class Grid {
     public static int tGrid = 0;
 
     // minimum number of "plates" in grid
-    public static int tPlates = 1000000;
+    public static int tPlates = 49;
 
     // top row value
     public static Float gTop = 30.00f;
@@ -51,7 +47,30 @@ public class Grid {
     // right row value
     public static Float gRight = 72.00f;
 
+    //--------------------------// 
+    //  Multithreading Section  //
+    //--------------------------//
+
+    // thread count
+    public static int numChild = 1;
+    public static String threading = "";
+
     //-------------------------------------------------------------------------------------------//
+
+
+    class Child implements Runnable {
+
+
+        @Override
+        public void run() {
+            // TODO Auto-generated method stub
+            
+        }
+
+        
+    }
+
+
 
     /**
      * The main function is a Java program that takes a 2D array of numbers and averages the numbers
@@ -71,12 +90,16 @@ public class Grid {
         int cCols = 0;
 
         // figure out how large the 2D array needs to be
-        while (cPlates < tPlates) {
+        // make sure grid is divisable by 2
+        while ((cPlates < tPlates) || (cRows%2 != 0)) {
             cPlates = 0;
             cRows++;
             cCols++;
             cPlates = cRows * cCols;
         }
+
+        // calculate thread range
+        int range = cRows/numChild;
 
         Float[][] grid = new Float[cRows][cCols];
 
@@ -102,7 +125,7 @@ public class Grid {
         // System.out.println("Starting Grid:");
         // System.out.println();
 
-        // printGrid(gridVar);
+        // printGrid(grid);
 
         
 
@@ -113,7 +136,7 @@ public class Grid {
         reCalcAvg(grid);
 
         // repeat average calculation until error is less than 5
-        while (tError >= 5) {
+        while (tError > 5) {
             reCalcAvg(grid);
         }
         
@@ -129,7 +152,7 @@ public class Grid {
         // printGrid(grid);
 
         // determine threading type
-        if (threads != 1) {
+        if (numChild != 1) {
             threading = "Multiple Thread";
         }else{
             threading = "Single Thread";
@@ -420,4 +443,6 @@ public class Grid {
             System.out.println();
         }
     }
+
+    
 }
