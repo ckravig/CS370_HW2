@@ -90,7 +90,7 @@ public class Grid{
         Float[][] grid = new Float[cRows][cCols];
 
         // calculate thread range
-        int range = cRows/4;
+        int range = cRows/numChild;
 
         List<Thread> threads = new ArrayList<Thread>();
 
@@ -169,7 +169,7 @@ public class Grid{
 
         //tAverage(grid);
 
-        System.out.println("Total Calulations = " + calcs);
+        System.out.println("Total Calulations = " + calcs/numChild);
 
         System.out.println();
         System.out.print("Type: " + threading + "; Size=" + tGrid);
@@ -655,9 +655,12 @@ class Child implements Runnable {
 
         Grid.calcAvgThreadTest(tGrid, begin, end);
 
-        
+        System.out.println("Current Total Error: " + Grid.tError);
+
         while (Grid.tError > 5) {
             Grid.reCalcAvgThreadTest(tGrid, begin, end);
+
+            System.out.println(Grid.tError);
 
             // add to total repeated calculations total
             Grid.calcs++;
