@@ -15,7 +15,7 @@ import java.util.List;
  *      * Test Double vs Float runtime
  */
 
-public class Grid{
+public class test{
 
     //-------------------------------------------------------------------------------------------// 
 
@@ -36,7 +36,7 @@ public class Grid{
     public static int tGrid = 0;
 
     // minimum number of "plates" in grid
-    public static int tPlates = 100;
+    public static int tPlates = 25;
 
     // top row value
     public static Float gTop = 30.00f;
@@ -251,7 +251,7 @@ public class Grid{
 
     public static void reCalcAvgThreadTest(Float[][] grid, int begin, int end) {
         
-        // Float cError = 0.00f;
+        // zFloat cError = 0.00f;
 
         //----------------------// 
         //  Calculate Averages  //
@@ -260,7 +260,7 @@ public class Grid{
         
 
             // add to total repeated calculations total
-            Grid.calcs++;
+            test.calcs++;
 
             // iterate through the 2D array, row by row by accessing the
             // individual arrays within the 2D array
@@ -435,29 +435,29 @@ class Child implements Runnable {
     @Override
     public void run() {
                 
-        Grid.fillGridThreadTest(tGrid, begin, end);
+        test.fillGridThreadTest(tGrid, begin, end);
 
         
 
-        Grid.calcAvgThreadTest(tGrid, begin, end);
+        test.calcAvgThreadTest(tGrid, begin, end);
 
 
         System.out.println("Current Thread: " + Thread.currentThread().getName());
 
         
-        Grid.reCalcAvgThreadTest(tGrid, begin, end);
+        test.reCalcAvgThreadTest(tGrid, begin, end);
 
 
         
         
 
-        while (Grid.threadError[0] + Grid.threadError[1] + Grid.threadError[2] + Grid.threadError[3]   > 5) {
-            // System.out.println("Current Total Error: " + Grid.tError);
-            Grid.threadError[Integer.parseInt(Thread.currentThread().getName())] = 0.00f;
-            Grid.tError = 0.00f;
-            Grid.reCalcAvgThreadTest(tGrid, begin, end);
-            Grid.tError += Grid.threadError[Integer.parseInt(Thread.currentThread().getName())];
-            System.out.println("Thread: " + Thread.currentThread().getName() + " Total Error: " + Grid.threadError[Integer.parseInt(Thread.currentThread().getName())]);
+        while (test.threadError[Integer.parseInt(Thread.currentThread().getName())] > 5) {
+            // System.out.println("Current Total Error: " + test.tError);
+            test.threadError[Integer.parseInt(Thread.currentThread().getName())] = 0.00f;
+            test.tError = 0.00f;
+            test.reCalcAvgThreadTest(tGrid, begin, end);
+            test.tError += test.threadError[Integer.parseInt(Thread.currentThread().getName())];
+            System.out.println("Thread: " + Thread.currentThread().getName() + " Total Error: " + test.threadError[Integer.parseInt(Thread.currentThread().getName())]);
         }
         
         
