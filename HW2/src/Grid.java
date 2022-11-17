@@ -1,5 +1,7 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 /**
  * Author: Collin Kravig
@@ -36,19 +38,19 @@ public class Grid{
     public static int tGrid = 0;
 
     // minimum number of "plates" in grid
-    public static int tPlates = 100;
+    public static int tPlates = 64;
 
     // top row value
-    public static Float gTop = 30.00f;
+    public static Float gTop = 90.00f;
 
     // bottom row value
-    public static Float gBot = 75.00f;
+    public static Float gBot = 20.00f;
 
     // left row value
-    public static Float gLeft = 15.00f;
+    public static Float gLeft = 10.00f;
 
     // right row value
-    public static Float gRight = 72.00f;
+    public static Float gRight = 80.00f;
 
     //--------------------------// 
     //  Multithreading Section  //
@@ -59,6 +61,8 @@ public class Grid{
     public static String threading = "";
 
     public static Float[] threadError;
+
+    public static CyclicBarrier barrier = new CyclicBarrier(numChild);
 
     //-------------------------------------------------------------------------------------------//
 
@@ -145,7 +149,9 @@ public class Grid{
             threading = "Single Thread";
         }
 
-        //tAverage(grid);
+        tAverage(grid);
+
+        System.out.println("Middle Point: " + grid[grid.length/2][grid.length/2]);
 
         System.out.println("Total Calulations = " + calcs/numChild);
 
@@ -257,7 +263,9 @@ public class Grid{
         //  Calculate Averages  //
         //----------------------//
 
-        
+            tError =0.00f;
+
+            Float currError = 0.00f;
 
             // add to total repeated calculations total
             Grid.calcs++;
@@ -309,13 +317,18 @@ public class Grid{
 
                         // append error to total error
 
-                        threadError[Integer.parseInt(Thread.currentThread().getName())] += error;
+                        currError += error;
+
+                        // tError += error;
+
 
                         // store average in array and print to new grid
                         grid[r][c] = avg;
                     }
                 }
             }
+
+            threadError[Integer.parseInt(Thread.currentThread().getName())] = currError;
     }
 
     //-------------------------------------------------------------------------------------------//
@@ -453,12 +466,30 @@ class Child implements Runnable {
 
         while (Grid.threadError[0] + Grid.threadError[1] + Grid.threadError[2] + Grid.threadError[3]   > 5) {
             // System.out.println("Current Total Error: " + Grid.tError);
-            Grid.threadError[Integer.parseInt(Thread.currentThread().getName())] = 0.00f;
+            
             Grid.tError = 0.00f;
             Grid.reCalcAvgThreadTest(tGrid, begin, end);
             Grid.tError += Grid.threadError[Integer.parseInt(Thread.currentThread().getName())];
-            System.out.println("Thread: " + Thread.currentThread().getName() + " Total Error: " + Grid.threadError[Integer.parseInt(Thread.currentThread().getName())]);
+            // System.out.println("Thread: " + Thread.currentThread().getName() + " Total Error: " + Grid.threadError[Integer.parseInt(Thread.currentThread().getName())]);
+
+            // System.out.println("Before Barrier" + Thread.currentThread().getName());
+            try {
+                Grid.barrier.await();
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (BrokenBarrierException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            // System.out.println("After Barrier" + Thread.currentThread().getName());
         }
+        // System.out.println("Done : " + Thread.currentThread().getName() + (Grid.threadError[0] + Grid.threadError[1] + Grid.threadError[2] + Grid.threadError[3]));
+
+        // while (Grid.tError > 5) {
+        //     Grid.reCalcAvgThreadTest(tGrid, begin, end);
+            
+        // }
         
         
         
