@@ -9,35 +9,54 @@
  *  
  *      * Test Float (Wrapper Class) vs float (primitive) for data in array as far as runtime
  * 
- *      * Test Double vs Float runtime
+ *      * Test float vs Float runtime
  */
 
 /**
  * This class is the main class that creates the grid and the threads
  */
-
-
 import java.util.concurrent.CyclicBarrier;
 
 public class Grid {
 
-    // Initialize variables to be used
+    //-------------------------// 
+    //  Class Level Variables  //
+    //-------------------------//
 
-    // Declaring a variable called gridSize and setting it to private and static.
     private static int gridSize;
+
     private static int totalThreads;
+
     private static int topRow;
+
     private static int leftColumn;
+
     private static int bottomRow;
+
     private static int rightColumn;
-    private static double[] totalErrors;
-    private static double[] totalAvgs;
+
+    private static float[] totalErrors;
+
+    private static float[] totalAvgs;
+
     private static int[] calculations;
+
     private static long endTime;
+
     private static long startTime;
-    private static double[][] grid;
+
+    private static float[][] grid;
+
+    //--------------------------------// 
+    //  Class Level Thread Variables  //
+    //--------------------------------//
+
+    public static String threadType;
+
     private static CyclicBarrier barrier;
+
     private static Child threadOps;
+
     // Creating an array of threads.
     private static Thread[] threads;
 
@@ -48,65 +67,55 @@ public class Grid {
      */
     public static void main(String[] args) throws InterruptedException {
 
-        gridSize = 1000;
+    //---------------------// 
+    //  Program Variables  //
+    //---------------------//
+
+        // Setting the size of the grid. (NxN)
+        gridSize = 8;
+
+        // This is the number of threads that will be used to calculate the average of each cell in the
+        // grid.
         totalThreads = 4;
+
+        // These are the default values for the top, bottom, left, and right rows and columns.
         topRow = 90;
         leftColumn = 10;
         bottomRow = 80;
         rightColumn = 20;
+        
+    //---------------------//
+    //---------------------//
 
-        grid = new double[gridSize][gridSize];
+        // Creating a 2D array of floats.
+        grid = new float[gridSize][gridSize];
 
+        // This is setting the start time of the program to the current time in milliseconds.
         startTime = System.currentTimeMillis();
 
         endTime = 0;
 
         calculations = new int[4];
 
-        totalAvgs = new double[4];
+        totalAvgs = new float[4];
 
-        totalErrors = new double[4];
+        totalErrors = new float[4];
 
-        // Fill grid with default border values
+        //-------------// 
+        //  Fill Grid  //
+        //-------------//
 
-        for (int i = 1; i < gridSize - 1; i++) {
-
-            grid[0][i] = topRow; // Set top row to default values
-
-        } // End for loop
-
-        for (int i = 1; i < gridSize - 1; i++) {
-
-            grid[i][0] = leftColumn; // Set left column to default values
-
-        } // End for loop
-
-        for (int i = 1; i < gridSize - 1; i++) {
-
-            grid[i][gridSize - 1] = rightColumn; // Set right column to default values
-
-        } // End for loop
-
-        for (int i = 1; i < gridSize - 1; i++) {
-
-            grid[gridSize - 1][i] = bottomRow; // Set bottom row to default values
-
-        } // End for loop
-
-        grid[0][0] = (grid[0][1] + grid[1][0]) / 2;
-
-        grid[0][gridSize - 1] = (grid[0][gridSize - 2] + grid[1][gridSize - 1]) / 2;
-
-        grid[gridSize - 1][0] = (grid[gridSize - 2][0] + grid[gridSize - 1][1]) / 2;
-
-        grid[gridSize - 1][gridSize - 1] = (grid[gridSize - 2][gridSize - 1] + grid[gridSize - 1][gridSize - 2]) / 2;
-
+        fillGrid();
 
         //----------------------// 
         //  Print Initial Grid  //
         //----------------------//
 
-        // printGrid();
+        System.out.println();
+        System.out.println("Grid Size: " + gridSize);
+        System.out.println();
+        System.out.println("Initial Grid:");
+        printGrid();
 
 
         // -------------------- //
@@ -114,6 +123,8 @@ public class Grid {
         barrier = null;
 
         if (totalThreads == 1) {
+
+            threadType = "Type: Single thread;";
 
             // create barrier for 1 thread
             barrier = new CyclicBarrier(totalThreads);
@@ -134,39 +145,10 @@ public class Grid {
 
             } // End catch
 
-            // print out results of calculations
-            System.out.println("Statistics:");
-
-            System.out.println("Iterations: " + (calculations[0]));
-
-            if (totalThreads == 1) {
-
-                System.out.println("Type: Single thread");
-
-            } // End if
-
-            if (totalThreads != 1) {
-
-                System.out.println("Type: Multi thread (" + totalThreads + ")");
-
-            } // End if
-
-            System.out.println("Size: (" + gridSize + "x" + gridSize + ")");
-
-            System.out.println("Total grid average: "
-                    + ((totalAvgs[0] + totalAvgs[1] + totalAvgs[2] + totalAvgs[3])
-                            / ((gridSize - 2) * (gridSize - 2))));
-
-            System.out.println("Total error: " + ((totalErrors[0] + totalErrors[1] + totalErrors[2] + totalErrors[3])));
-
-            // get total runtime of program
-
-            endTime = System.currentTimeMillis();
-
-            System.out.println("Time is " + (endTime - startTime) + " ms");
-
         } /* End if */
         else {
+
+            threadType = "Type: Multiple thread;";
 
             barrier = new CyclicBarrier(totalThreads);
 
@@ -187,12 +169,15 @@ public class Grid {
 
             } // End for
 
+        }
+
             //--------------------// 
             //  Print Final Grid  //
             //--------------------//
 
-            // System.out.println();
-            // printGrid();
+            System.out.println();
+            System.out.println("Final Grid:");
+            printGrid();
 
 
             //------------------// 
@@ -205,17 +190,7 @@ public class Grid {
 
             System.out.println();
 
-            if (totalThreads == 1) {
-
-                System.out.print("Type: Single thread;");
-
-            } 
-
-            if (totalThreads != 1) {
-
-                System.out.print("Type: Multi thread;");
-
-            }
+            System.out.print(threadType);
 
             System.out.print(" Size: "+ gridSize + "x" + gridSize);
 
@@ -244,8 +219,6 @@ public class Grid {
 
             System.out.println();
 
-        }
-
     } 
 
 
@@ -263,6 +236,37 @@ public class Grid {
             System.out.print("|");
             System.out.println();
         }
+    }
+
+
+    
+    /**
+     * Fills the grid with values
+     */
+    public static void fillGrid() {
+        for (int i = 1; i < gridSize - 1; i++) {
+
+            grid[0][i] = topRow; // Set top row to default values
+
+        } // End for loop
+
+        for (int i = 1; i < gridSize - 1; i++) {
+
+            grid[i][0] = leftColumn; // Set left column to default values
+
+        } // End for loop
+
+        for (int i = 1; i < gridSize - 1; i++) {
+
+            grid[i][gridSize - 1] = rightColumn; // Set right column to default values
+
+        } // End for loop
+
+        for (int i = 1; i < gridSize - 1; i++) {
+
+            grid[gridSize - 1][i] = bottomRow; // Set bottom row to default values
+
+        } // End for loop
     }
 
 } 

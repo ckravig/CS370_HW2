@@ -1,10 +1,12 @@
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
+
 /**
- * This is a class that extends Thread and implements Runnable. It has a constructor that takes in a 2D
- * array, an integer, an integer, an integer, a CyclicBarrier, an integer array, a double array, and a
- * double array. It has a run() method that does a bunch of stuff
+ * This class is a child class that extends the Thread class and implements the Runnable interface. It
+ * has a constructor that takes in a 2D array, an integer, an integer, an integer, a CyclicBarrier, an
+ * integer array, a float array, and a float array. It also has a run() method that calculates the
+ * average of the surrounding cells and sets the new average to the cell
  */
 public class Child extends java.lang.Thread implements Runnable {
 
@@ -13,28 +15,29 @@ public class Child extends java.lang.Thread implements Runnable {
     public CyclicBarrier barrier;
 
     int len;
-    double map[][];
+    float grid[][];
     int threadNum;
     int totalThreads;
     int midLen;
     int num_of_cells;
     int row;
     int col;
-    double[] totalAvg;
-    double[] totalError;
+    float[] totalAvg;
+    float[] totalError;
     int[] iterations;
 
     int rowLength;
     int colLength;
 
    // This is a constructor that takes in a 2D array, an integer, an integer, an integer, a CyclicBarrier,
-   // an integer array, a double array, and a
-   //  * double array.
-    public Child(double[][] map, int len, int threadNum, int totalThreads, CyclicBarrier barrier, int[] iterations,
-            double[] totalAvg, double[] totalError) {
+   // an integer array, a float array, and a
+   //  * float array.
+    public Child(float[][] grid, int len, int threadNum, int totalThreads, CyclicBarrier barrier, int[] iterations,
+            float[] totalAvg, float[] totalError) {
 
-        // Save variables passed through
-        this.map = map;
+        
+        // Setting the variables to the variables passed in the constructor.
+        this.grid = grid;
         this.len = len;
         this.threadNum = threadNum;
         this.totalThreads = totalThreads;
@@ -123,20 +126,20 @@ public class Child extends java.lang.Thread implements Runnable {
                     for (int j = col; j <= colLength; j++) {
 
                         // Reset new and previous average
-                        double prevAvg = 0;
-                        double newAvg = 0;
+                        float prevAvg = 0;
+                        float newAvg = 0;
 
-                        prevAvg = map[i][j];
+                        prevAvg = grid[i][j];
 
                         // Calculate average of surrounding cells
-                        double average = (map[i - 1][j] + map[i + 1][j] + map[i][j - 1] + map[i][j + 1]);
+                        float average = (grid[i - 1][j] + grid[i + 1][j] + grid[i][j - 1] + grid[i][j + 1]);
 
                         // Set new average to cell
-                        map[i][j] = ((average / 4) * 10.0) / 10.0;
-                        newAvg = map[i][j];
+                        grid[i][j] = ((average / 4) * 10.0f) / 10.0f;
+                        newAvg = grid[i][j];
                         totalAvg[threadNum] += newAvg;
 
-                        double error = newAvg - prevAvg;
+                        float error = newAvg - prevAvg;
 
                         totalError[threadNum] = totalError[threadNum] + error;
 
@@ -149,7 +152,7 @@ public class Child extends java.lang.Thread implements Runnable {
                 // Wait for threads
                 barrier.await();
 
-                System.out.println("Current Total Error: " + (totalError[0] + totalError[1] + totalError[2] + totalError[3]));
+                // System.out.println("Current Total Error: " + (totalError[0] + totalError[1] + totalError[2] + totalError[3]));
 
             } while ((totalError[0] + totalError[1] + totalError[2] + totalError[3]) > 5);
 
