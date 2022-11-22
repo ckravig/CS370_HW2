@@ -1,8 +1,3 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
-import java.util.concurrent.CyclicBarrier;
-
 /**
  * Author: Collin Kravig
  * Class: CSCI 370
@@ -17,485 +12,257 @@ import java.util.concurrent.CyclicBarrier;
  *      * Test Double vs Float runtime
  */
 
-public class Grid{
+/**
+ * This class is the main class that creates the grid and the threads
+ */
 
-    //-------------------------------------------------------------------------------------------// 
 
-    //-------------------------// 
-    //  Class Level Variables  //
-    //-------------------------//
+import java.util.concurrent.CyclicBarrier;
 
-    // how many times averages were calculated
-    public static int calcs = 0;
+public class Grid {
 
-    // store total error
-    public static Float tError = 0.00f;
+    // Initialize variables to be used
 
-    // average grid value
-    public static Float tAvg = 0.00f;
-
-    // total grid size
-    public static int tGrid = 0;
-
-    // minimum number of "plates" in grid
-    public static int tPlates = 64;
-
-    // top row value
-    public static Float gTop = 90.00f;
-
-    // bottom row value
-    public static Float gBot = 20.00f;
-
-    // left row value
-    public static Float gLeft = 10.00f;
-
-    // right row value
-    public static Float gRight = 80.00f;
-
-    //--------------------------// 
-    //  Multithreading Section  //
-    //--------------------------//
-
-    // thread count
-    public static int numChild = 4;
-    public static String threading = "";
-
-    public static Float[] threadError;
-
-    public static CyclicBarrier barrier = new CyclicBarrier(numChild);
-
-    //-------------------------------------------------------------------------------------------//
+    // Declaring a variable called gridSize and setting it to private and static.
+    private static int gridSize;
+    private static int totalThreads;
+    private static int topRow;
+    private static int leftColumn;
+    private static int bottomRow;
+    private static int rightColumn;
+    private static double[] totalErrors;
+    private static double[] totalAvgs;
+    private static int[] calculations;
+    private static long endTime;
+    private static long startTime;
+    private static double[][] grid;
+    private static CyclicBarrier barrier;
+    private static Child threadOps;
+    // Creating an array of threads.
+    private static Thread[] threads;
 
     /**
-     * The main function is a Java program that takes a 2D array of numbers and averages the numbers
-     * in the array until the error is less than 5
+     * The main function creates a grid of size 10x10, sets the default values for the top, bottom,
+     * left, and right rows and columns, and then creates a new thread for each of the 4 threads that
+     * will be used to calculate the average of each cell in the grid
      */
     public static void main(String[] args) throws InterruptedException {
-        
-        //-----------------------// 
-        //  CREATE INITIAL GRID  //
-        //-----------------------//
 
-        // current plate count
-        int cPlates = 0;
+        gridSize = 1000;
+        totalThreads = 4;
+        topRow = 90;
+        leftColumn = 10;
+        bottomRow = 80;
+        rightColumn = 20;
 
-        // current rows and columns
-        int cRows = 0;
-        int cCols = 0;
+        grid = new double[gridSize][gridSize];
 
-        // figure out how large the 2D array needs to be
-        // make sure grid is divisable by 4 to be optimized for 
-        // 4 threads
-        while ((cPlates < tPlates) || (cRows%4 != 0)) {
-            cPlates = 0;
-            cRows++;
-            cCols++;
-            cPlates = cRows * cCols;
-        }
+        startTime = System.currentTimeMillis();
 
-        Float[][] grid = new Float[cRows][cCols];
+        endTime = 0;
 
-        // calculate thread range
-        int range = cRows/numChild;
+        calculations = new int[4];
 
-        List<Thread> threads = new ArrayList<Thread>();
+        totalAvgs = new double[4];
 
-        // store grid starting row for threads
-        int begin = 0;
+        totalErrors = new double[4];
 
-        threadError = new Float[numChild];
+        // Fill grid with default border values
 
-        // Spawn children processes
-        for (int i=0; i<numChild; i++) {
-            Thread t = new Thread(new Child(begin, begin+range, grid),""+i);
-            threads.add(t);
-            t.start();
-            begin += range;
-            threadError[Integer.parseInt(t.getName())] = 0.00f;
-        }
+        for (int i = 1; i < gridSize - 1; i++) {
 
-        // Wait for children to finish
-        for (Thread each : threads) {
-            each.join();
-        }
-        System.out.println("All Children Done: " + numChild);
+            grid[0][i] = topRow; // Set top row to default values
 
-        
-        //----------------------// 
-        //  PRINT INITIAL GRID  //
-        //----------------------//
+        } // End for loop
 
-        // System.out.println();
-        // System.out.println("Starting Grid:");
-        // System.out.println();
+        for (int i = 1; i < gridSize - 1; i++) {
 
-        // printGrid(grid);
-        
+            grid[i][0] = leftColumn; // Set left column to default values
 
-        //--------------------// 
-        //  PRINT FINAL GRID  //
-        //--------------------//
+        } // End for loop
 
-        // System.out.println();
-        // System.out.println("Final Grid: ");
-        // System.out.println();
+        for (int i = 1; i < gridSize - 1; i++) {
 
-        printGrid(grid);
+            grid[i][gridSize - 1] = rightColumn; // Set right column to default values
 
-        // determine threading type
-        if (numChild != 1) {
-            threading = "Multiple Thread";
-        }else{
-            threading = "Single Thread";
-        }
+        } // End for loop
 
-        tAverage(grid);
+        for (int i = 1; i < gridSize - 1; i++) {
 
-        System.out.println("Middle Point: " + grid[grid.length/2][grid.length/2]);
+            grid[gridSize - 1][i] = bottomRow; // Set bottom row to default values
 
-        System.out.println("Total Calulations = " + calcs/numChild);
+        } // End for loop
 
-        System.out.println();
-        System.out.print("Type: " + threading + "; Size=" + tGrid);
-        System.out.print("; Average Grid Value=");
-        System.out.printf("%,.1f",tAvg);
-        System.out.print("; Total Error=");
-        System.out.printf("%,.2f",tError);
-        System.out.println();
-        System.out.println();
+        grid[0][0] = (grid[0][1] + grid[1][0]) / 2;
 
-    }
+        grid[0][gridSize - 1] = (grid[0][gridSize - 2] + grid[1][gridSize - 1]) / 2;
 
+        grid[gridSize - 1][0] = (grid[gridSize - 2][0] + grid[gridSize - 1][1]) / 2;
 
-    //-------------------------------------------------------------------------------------------//
+        grid[gridSize - 1][gridSize - 1] = (grid[gridSize - 2][gridSize - 1] + grid[gridSize - 1][gridSize - 2]) / 2;
 
-    //-----------------------------// 
-    //  First Average Calculation  //
-    //-----------------------------//
-
-    /**
-     * The function iterates through the 2D array, row by row, and checks for empty spots in the grid.
-     * If an empty spot is found, the function calculates the average of the surrounding numbers and
-     * stores the average in the empty spot
-     * 
-     * @param grid the 2D array that holds the data
-     */
-
-    public static void calcAvgThreadTest(Float[][] grid, int begin, int end) {
 
         //----------------------// 
-        //  Calculate Averages  //
+        //  Print Initial Grid  //
         //----------------------//
 
-        // iterate through the 2D array, row by row by accessing the
-        // individual arrays within the 2D array
-        for (int r = begin; r < end; r++) {
-
-            // iterate through the given row to access the data
-            for(int c = 0; c < grid.length; c++) {
-
-                // check for empty spots in the grid
-                if (grid[r][c] == null && (c != 0 && c != (grid.length - 1)) && (r != 0 && r != (grid.length - 1))) {
-                    
-                    // divisor for average calculation
-                    Float divisor = 4.00f;
-
-                    // average calculation temp values
-                    Float top = 0.00f;
-                    Float left = 0.00f;
-                    Float right = 0.00f;
-                    Float bot = 0.00f;
-
-                    // check top number
-                    if (r != 0 && grid[(r-1)][c] != null) {
-                        top = grid[(r-1)][c];
-                    }
-
-                    // check bottom number
-                    if (r != (end - 1) && grid[(r+1)][c] != null) {
-                        bot = grid[(r+1)][c];
-                    }
-
-                    // check left number
-                    if (c != 0 && grid[r][(c-1)] != null) {
-                        left = grid[r][(c-1)];
-                    }
-
-                    // check right number
-                    if (c != (grid.length - 1) && grid[r][(c+1)] != null) {
-                        right = grid[r][(c+1)];
-                    }
-
-                    // check for corners to adjust divisor
-                    if (c == 0 || r == 0) {
-                        divisor = 2.00f;
-                    }
-
-                    Float avg = ((top + bot + left + right) / divisor);
-
-                    // store average in array and print to new grid
-                    grid[r][c] = avg;
-                }
-            }
-        }
-
-        calcs++;
-    }
-
-    //-------------------------------------------------------------------------------------------// 
-
-    //----------------------------------// 
-    //  Repeated Average Calculations   //
-    //----------------------------------//
-
-    /**
-     * The function takes a 2D array of Floats and calculates the average of the four surrounding
-     * cells and replaces the current cell with the average
-     * 
-     * @param grid the 2D array that holds the data
-     */
-
-    public static void reCalcAvgThreadTest(Float[][] grid, int begin, int end) {
-        
-        // Float cError = 0.00f;
-
-        //----------------------// 
-        //  Calculate Averages  //
-        //----------------------//
-
-            tError =0.00f;
-
-            Float currError = 0.00f;
-
-            // add to total repeated calculations total
-            Grid.calcs++;
-
-            // iterate through the 2D array, row by row by accessing the
-            // individual arrays within the 2D array
-            for (int r = begin; r < end; r++) {
-
-                // iterate through the given row to access the data
-                for(int c = 0; c < grid.length; c++) {
+        // printGrid();
 
 
-                    // check that we aren't on the sides of the grid
-                    if ((c != 0 && c != (grid.length - 1)) && (r != 0 && r != (grid.length - 1))) {
-                        
-                        // divisor for average calculation
-                        Float divisor = 4.00f;
+        // -------------------- //
 
-                        // average calculation temp values
-                        Float top = 0.00f;
-                        Float left = 0.00f;
-                        Float right = 0.00f;
-                        Float bot = 0.00f;
+        barrier = null;
 
-                        // check top number
-                        if (r != 0 && (grid[(r-1)][c]) != null) {
-                            top = grid[(r-1)][c];
-                        }
+        if (totalThreads == 1) {
 
-                        // check bottom number
-                        if (r != (end - 1)) {
-                            bot = grid[(r+1)][c];
-                        }
+            // create barrier for 1 thread
+            barrier = new CyclicBarrier(totalThreads);
 
-                        // check left number
-                        if (c != 0) {
-                            left = grid[r][(c-1)];
-                        }
+            threadOps = new Child(grid, gridSize, 0, totalThreads, barrier, calculations, totalAvgs, totalErrors);
 
-                        // check right number
-                        if (c != (grid.length - 1)) {
-                            right = grid[r][(c+1)];
-                        }
+            threadOps.start();
 
-                        Float avg = ((top + bot + left + right) / divisor);
+            try {
 
-                        // calculate error (|new avg - old avg|)
-                        Float error = Math.abs(avg - grid[r][c]);
+                threadOps.join();
 
-                        // append error to total error
+            } /* End try */
 
-                        currError += error;
+            catch (Exception e) {
 
-                        // tError += error;
+                System.out.println(e);
+
+            } // End catch
+
+            // print out results of calculations
+            System.out.println("Statistics:");
+
+            System.out.println("Iterations: " + (calculations[0]));
+
+            if (totalThreads == 1) {
+
+                System.out.println("Type: Single thread");
+
+            } // End if
+
+            if (totalThreads != 1) {
+
+                System.out.println("Type: Multi thread (" + totalThreads + ")");
+
+            } // End if
+
+            System.out.println("Size: (" + gridSize + "x" + gridSize + ")");
+
+            System.out.println("Total grid average: "
+                    + ((totalAvgs[0] + totalAvgs[1] + totalAvgs[2] + totalAvgs[3])
+                            / ((gridSize - 2) * (gridSize - 2))));
+
+            System.out.println("Total error: " + ((totalErrors[0] + totalErrors[1] + totalErrors[2] + totalErrors[3])));
+
+            // get total runtime of program
+
+            endTime = System.currentTimeMillis();
+
+            System.out.println("Time is " + (endTime - startTime) + " ms");
+
+        } /* End if */
+        else {
+
+            barrier = new CyclicBarrier(totalThreads);
+
+            threads = new Thread[totalThreads];
+
+            for (int i = 0; i < totalThreads; i++) {
+
+                threads[i] = new Child(grid, gridSize, i, totalThreads, barrier, calculations, totalAvgs,
+                        totalErrors);
+
+                threads[i].start();
+
+            } // End for
+
+            for (int i = 0; i < totalThreads; i++) {
+
+                threads[i].join();
+
+            } // End for
+
+            //--------------------// 
+            //  Print Final Grid  //
+            //--------------------//
+
+            // System.out.println();
+            // printGrid();
 
 
-                        // store average in array and print to new grid
-                        grid[r][c] = avg;
-                    }
-                }
+            //------------------// 
+            //  Print Solution  //
+            //------------------//
+
+            System.out.println();
+
+            System.out.println("Number of Calculations: " + (calculations[0]));
+
+            System.out.println();
+
+            if (totalThreads == 1) {
+
+                System.out.print("Type: Single thread;");
+
+            } 
+
+            if (totalThreads != 1) {
+
+                System.out.print("Type: Multi thread;");
+
             }
 
-            threadError[Integer.parseInt(Thread.currentThread().getName())] = currError;
-    }
+            System.out.print(" Size: "+ gridSize + "x" + gridSize);
 
-    //-------------------------------------------------------------------------------------------//
 
-    public static void tAverage(Float[][] grid){
+            System.out.print("; Average Grid Value=");
+            System.out.printf("%,.1f",
+                    + ((totalAvgs[0] + totalAvgs[1] + totalAvgs[2] + totalAvgs[3])
+                            / ((gridSize - 2) * (gridSize - 2))));
 
-        // calculates the total average of the insides
+                            System.out.print("; Total Error=");
+                            System.out.printf("%,.2f",(totalErrors[0] + totalErrors[1] + totalErrors[2] + totalErrors[3]));
+           
+            System.out.println();
+            System.out.println();
 
-        // store current total
-        Float total = 0.00f;
-
-        // current column and row
-        int c = 0; // column
-        int r = 0; // row
-
-        int insideGrid = 0;
-
-        // iterate through the 2D array, row by row by accessing the
-        // individual arrays within the 2D array
-        for (Float[] rows: grid) {
-            // reset current column
-            c = 0;
-            // iterate through the given row to access the data
-            for(Float data: rows) {
-                if ((c != 0 && c != (grid.length - 1)) && (r != 0 && r != (rows.length - 1))) {
-                    total += data;
-                    insideGrid++;
-                }
-                c++;
-                tGrid++;
-            }
-            r++;
-        }
-
-        // possibly change for multithreading
-        tAvg = total / (insideGrid);
-    }
-
-    //-------------------------------------------------------------------------------------------//
-
-    public static void fillGridThreadTest(Float[][] grid, int begin, int end) {
-
-        // iterate through the 2D array, row by row by accessing the
-        // individual arrays within the 2D array
-        for (int r = begin; r < end; r++) {
-
+            System.out.print("Middle grid value: ");
+            System.out.printf("%,.2f",grid[gridSize / 2][gridSize / 2]);
+            System.out.println();
             
-            // iterate through the given row to access the data
-            for(int c = 0; c < grid.length; c++) {
-                        
-                // populate top row
-                if(r == 0 && (c != 0 && c != (grid.length - 1))){
-                    grid[r][c] = gTop;
-                }
+            System.out.println();
 
-                // populate bottom row
-                if(r == (grid.length - 1) && (c != 0 && c != (grid.length - 1))){
-                    grid[r][c] = gBot;
-                }
+            // get total runtime of program
+            endTime = System.currentTimeMillis();
 
-                // populate left row
-                if(c == 0 && (r != 0 && r != (grid.length - 1))){
-                    grid[r][c] = gLeft;
-                }
+            System.out.println("Time: " + (endTime - startTime) + " ms");
 
-                // populate right row
-                if(c == (grid.length - 1) && (r != 0 && r != (grid.length - 1))){
-                    grid[r][c] = gRight;
-                }
+            System.out.println();
 
-                
-            }
-            
         }
 
-    }
+    } 
 
-    //-------------------------------------------------------------------------------------------//
 
-    public static void printGrid(Float[][] grid) {
-        // iterate through the 2D array, row by row by accessing the
-        // individual arrays within the 2D array
-        for (Float[] rows: grid) {
-            // iterate through the given row to access the data
-            for(Float data: rows) {
+    // Prints the grid.
+    public static void printGrid() {
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
                 System.out.print("|");
-                if (data == null) {
+                if (grid[i][j] == 0.0) {
                     System.out.print("-----");
                 }else{
-                    System.out.printf("%,.2f",data);
+                    System.out.printf("%,.2f",grid[i][j]);
                 }
-                
             }
             System.out.print("|");
             System.out.println();
         }
     }
 
-    
-}
-
-
-class Child implements Runnable {
-
-    private int begin;
-    private int end;
-
-    private Float[][] tGrid;
-
-    public Child(int begin, int end, Float[][] grid) {
-        this.begin = begin;
-        this.end = end;
-        this.tGrid = grid;
-    }
-    
-
-    @Override
-    public void run() {
-                
-        Grid.fillGridThreadTest(tGrid, begin, end);
-
-        
-
-        Grid.calcAvgThreadTest(tGrid, begin, end);
-
-
-        System.out.println("Current Thread: " + Thread.currentThread().getName());
-
-        
-        Grid.reCalcAvgThreadTest(tGrid, begin, end);
-
-
-        
-        
-
-        while (Grid.threadError[0] + Grid.threadError[1] + Grid.threadError[2] + Grid.threadError[3]   > 5) {
-            // System.out.println("Current Total Error: " + Grid.tError);
-            
-            Grid.tError = 0.00f;
-            Grid.reCalcAvgThreadTest(tGrid, begin, end);
-            Grid.tError += Grid.threadError[Integer.parseInt(Thread.currentThread().getName())];
-            // System.out.println("Thread: " + Thread.currentThread().getName() + " Total Error: " + Grid.threadError[Integer.parseInt(Thread.currentThread().getName())]);
-
-            // System.out.println("Before Barrier" + Thread.currentThread().getName());
-            try {
-                Grid.barrier.await();
-            } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            } catch (BrokenBarrierException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            // System.out.println("After Barrier" + Thread.currentThread().getName());
-        }
-        // System.out.println("Done : " + Thread.currentThread().getName() + (Grid.threadError[0] + Grid.threadError[1] + Grid.threadError[2] + Grid.threadError[3]));
-
-        // while (Grid.tError > 5) {
-        //     Grid.reCalcAvgThreadTest(tGrid, begin, end);
-            
-        // }
-        
-        
-        
-        
-        
-    }
-
-    
-}
+} 
