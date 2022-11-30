@@ -1,0 +1,12 @@
+
+Grid Size: 1000
+
+
+Number of Calculations: 419753
+
+Type: Multiple thread; Size: 1000x1000; Average Grid Value=49.5; Total Error=5.00
+
+Middle grid value: 48.72
+
+Time: 7909810 ms
+
