@@ -1,0 +1,73 @@
+
+Grid Size: 400
+
+
+Number of Calculations: 81323
+
+Type: Multiple thread; Size: 400x400; Average Grid Value=48.7; Total Error=5.00
+
+Middle grid value: 45.28
+
+Time: 312432 ms
+
+=======================================================
+=======================================================
+Run: 2
+
+Grid Size: 400
+
+
+Number of Calculations: 64052
+
+Type: Multiple thread; Size: 400x400; Average Grid Value=47.6; Total Error=5.00
+
+Middle grid value: 40.81
+
+Time: 115098 ms
+
+=======================================================
+=======================================================
+Run: 3
+
+Grid Size: 400
+
+
+Number of Calculations: 81699
+
+Type: Multiple thread; Size: 400x400; Average Grid Value=48.7; Total Error=5.00
+
+Middle grid value: 45.40
+
+Time: 312347 ms
+
+=======================================================
+=======================================================
+Run: 4
+
+Grid Size: 400
+
+
+Number of Calculations: 80815
+
+Type: Multiple thread; Size: 400x400; Average Grid Value=48.7; Total Error=5.00
+
+Middle grid value: 45.26
+
+Time: 317995 ms
+
+=======================================================
+=======================================================
+Run: 5
+
+Grid Size: 400
+
+
+Number of Calculations: 78011
+
+Type: Multiple thread; Size: 400x400; Average Grid Value=48.7; Total Error=5.00
+
+Middle grid value: 45.55
+
+Time: 314779 ms
+
+=======================================================

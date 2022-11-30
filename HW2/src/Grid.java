@@ -15,6 +15,10 @@
 /**
  * This class is the main class that creates the grid and the threads
  */
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.concurrent.CyclicBarrier;
 
 public class Grid {
@@ -60,6 +64,10 @@ public class Grid {
     // Creating an array of threads.
     private static Thread[] threads;
 
+    public static String outFileName;
+
+    public static boolean output;
+
     /**
      * The main function creates a grid of size 10x10, sets the default values for the top, bottom,
      * left, and right rows and columns, and then creates a new thread for each of the 4 threads that
@@ -72,17 +80,22 @@ public class Grid {
     //---------------------//
 
         // Setting the size of the grid. (NxN)
-        gridSize = 8;
+        gridSize = Integer.valueOf(args[0]);
 
         // This is the number of threads that will be used to calculate the average of each cell in the
         // grid.
-        totalThreads = 4;
+        totalThreads = Integer.valueOf(args[1]);
 
         // These are the default values for the top, bottom, left, and right rows and columns.
         topRow = 90;
         leftColumn = 10;
         bottomRow = 80;
         rightColumn = 20;
+
+        // output file boolean (yes or no)
+        output = true;
+        // output file name
+        outFileName = ("src/output/" + gridSize + "x" + gridSize + "-" + totalThreads + "Thr.txt");
         
     //---------------------//
     //---------------------//
@@ -107,6 +120,27 @@ public class Grid {
 
         fillGrid();
 
+        //-----------------------// 
+        //  File Output Handler  //
+        //-----------------------//
+
+        if (output == true) {
+                
+            try {
+                // append to output file
+                PrintStream outFile = new PrintStream(new FileOutputStream(outFileName, true));
+
+                // Assign o to output stream
+                // using setOut() method
+                System.setOut(outFile);
+
+            } catch (FileNotFoundException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+
+        }
+
         //----------------------// 
         //  Print Initial Grid  //
         //----------------------//
@@ -114,8 +148,8 @@ public class Grid {
         System.out.println();
         System.out.println("Grid Size: " + gridSize);
         System.out.println();
-        System.out.println("Initial Grid:");
-        printGrid();
+        // System.out.println("Initial Grid:");
+        // printGrid();
 
 
         // -------------------- //
@@ -175,11 +209,11 @@ public class Grid {
             //  Print Final Grid  //
             //--------------------//
 
-            System.out.println();
-            System.out.println("Final Grid:");
-            printGrid();
+            // System.out.println();
+            // System.out.println("Final Grid:");
+            // printGrid();
 
-
+        
             //------------------// 
             //  Print Solution  //
             //------------------//
@@ -218,6 +252,7 @@ public class Grid {
             System.out.println("Time: " + (endTime - startTime) + " ms");
 
             System.out.println();
+            
 
     } 
 
