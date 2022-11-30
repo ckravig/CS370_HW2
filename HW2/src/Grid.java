@@ -95,7 +95,7 @@ public class Grid {
         // output file boolean (yes or no)
         output = true;
         // output file name
-        outFileName = ("src/output/" + gridSize + "x" + gridSize + "-" + totalThreads + "Thr.txt");
+        outFileName = ("src/output/Desktop/" + gridSize + "x" + gridSize + "-" + totalThreads + "Thr.txt");
         
     //---------------------//
     //---------------------//

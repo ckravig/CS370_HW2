@@ -1,0 +1,18 @@
+
+Grid Size: 1000
+
+
+Number of Calculations: 419772
+
+Type: Single thread; Size: 1000x1000; Average Grid Value=49.5; Total Error=5.00
+
+Middle grid value: 48.72
+
+Time: 3969447 ms
+
+=======================================================
+=======================================================
+Run: 2
+
+Grid Size: 1000
+
