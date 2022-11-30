@@ -13,7 +13,7 @@ public class RunTest extends Grid {
         String first = "10";
         String second = "100";
 
-        for (int n=0; n<=9; n++){
+        for (int n=0; n<=11; n++){
 
             if (n == 0) {
                 passArgs[0] = first;
@@ -44,6 +44,12 @@ public class RunTest extends Grid {
                 passArgs[1] = mult;
             } else if (n == 9) {
                 passArgs[0] = String.valueOf((Integer.valueOf(second) * (n % 5)));
+                passArgs[1] = mult;
+            } else if (n == 10) {
+                passArgs[0] = "1000";
+                passArgs[1] = sing;
+            } else if (n == 11) {
+                passArgs[0] = "1000";
                 passArgs[1] = mult;
             }
 
